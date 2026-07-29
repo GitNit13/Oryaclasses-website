@@ -829,84 +829,128 @@ function chk(fields) {
 /* ─────────────────────────────────────────
    PARENT FORM SUBMIT
 ───────────────────────────────────────── */
-function subS() {
+async function subS() {
   var fields = [
     {id:'p-nm', type:'text'}, {id:'p-ph', type:'phone'},
     {id:'p-ch', type:'text'}, {id:'p-gr', type:'select'},
     {id:'p-bd', type:'select'}, {id:'p-su', type:'text'},
     {id:'p-cy', type:'select'}, {id:'p-ad', type:'text'}
   ];
-  if (!chk(fields)) { document.querySelector('#pFrm .err')?.focus(); return; }
+
+  if (!chk(fields)) {
+    document.querySelector('#pFrm .err')?.focus();
+    return;
+  }
 
   var btn = document.getElementById('pSubmitBtn');
-  btn.disabled = true; btn.textContent = 'Sending…';
+  btn.disabled = true;
+  btn.textContent = "Sending...";
 
-  var params = {
-    parent_name:       document.getElementById('p-nm').value,
-    parent_phone:      '+91 ' + document.getElementById('p-ph').value,
-    child_name:        document.getElementById('p-ch').value,
-    child_grade:       document.getElementById('p-gr').value,
-    board:             document.getElementById('p-bd').value,
-    subjects:          document.getElementById('p-su').value,
-    city:              document.getElementById('p-cy').value,
-    teaching_mode:     document.getElementById('p-mo').value,
-    preferred_timing:  document.getElementById('p-ti').value,
-    address:           document.getElementById('p-ad').value,
+  const params = {
+    form: "Parent Registration",
+    parent_name: document.getElementById('p-nm').value,
+    parent_phone: "+91 " + document.getElementById('p-ph').value,
+    child_name: document.getElementById('p-ch').value,
+    child_grade: document.getElementById('p-gr').value,
+    board: document.getElementById('p-bd').value,
+    subjects: document.getElementById('p-su').value,
+    city: document.getElementById('p-cy').value,
+    teaching_mode: document.getElementById('p-mo').value,
+    preferred_timing: document.getElementById('p-ti').value,
+    address: document.getElementById('p-ad').value,
     special_requirements: document.getElementById('p-no').value
   };
 
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_PARENT, params)
-    .then(function () {
-      document.getElementById('pFrm').style.display = 'none';
-      document.getElementById('pOk').style.display = 'block';
-    })
-    .catch(function (err) {
-      console.error('EmailJS error:', err);
-      btn.disabled = false; btn.innerHTML = 'Submit Registration &#8594;';
-      alert('Something went wrong. Please try again or contact us directly.');
+  try {
+
+    const response = await fetch("/api/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(params)
     });
+
+    const result = await response.json();
+
+    if(result.success){
+      document.getElementById('pFrm').style.display='none';
+      document.getElementById('pOk').style.display='block';
+    }else{
+      throw new Error(result.message);
+    }
+
+  } catch(err){
+    console.error(err);
+    btn.disabled=false;
+    btn.innerHTML="Submit Registration &#8594;";
+    alert("Submission failed.");
+  }
 }
 
 /* ─────────────────────────────────────────
    TEACHER FORM SUBMIT
 ───────────────────────────────────────── */
-function subT() {
+async function subT() {
+
   var fields = [
     {id:'t-nm', type:'text'}, {id:'t-ph', type:'phone'},
     {id:'t-em', type:'email'}, {id:'t-ql', type:'select'},
     {id:'t-su', type:'text'}, {id:'t-gr', type:'select'},
     {id:'t-cy', type:'select'}, {id:'t-ar', type:'text'}
   ];
-  if (!chk(fields)) { document.querySelector('#tFrm .err')?.focus(); return; }
 
-  var btn = document.getElementById('tSubmitBtn');
-  btn.disabled = true; btn.textContent = 'Sending…';
+  if (!chk(fields)) {
+    document.querySelector('#tFrm .err')?.focus();
+    return;
+  }
 
-  var params = {
-    teacher_name:    document.getElementById('t-nm').value,
-    teacher_phone:   '+91 ' + document.getElementById('t-ph').value,
-    teacher_email:   document.getElementById('t-em').value,
-    qualification:   document.getElementById('t-ql').value,
-    subjects:        document.getElementById('t-su').value,
-    grades:          document.getElementById('t-gr').value,
-    experience:      document.getElementById('t-ex').value,
-    city:            document.getElementById('t-cy').value,
-    teaching_mode:   document.getElementById('t-mo').value,
-    area:            document.getElementById('t-ar').value,
-    expected_fee:    document.getElementById('t-fe').value,
-    about:           document.getElementById('t-bi').value
+  var btn=document.getElementById('tSubmitBtn');
+  btn.disabled=true;
+  btn.textContent="Sending...";
+
+  const params = {
+    form: "Teacher Application",
+    teacher_name: document.getElementById('t-nm').value,
+    teacher_phone: "+91 "+document.getElementById('t-ph').value,
+    teacher_email: document.getElementById('t-em').value,
+    qualification: document.getElementById('t-ql').value,
+    subjects: document.getElementById('t-su').value,
+    grades: document.getElementById('t-gr').value,
+    experience: document.getElementById('t-ex').value,
+    city: document.getElementById('t-cy').value,
+    teaching_mode: document.getElementById('t-mo').value,
+    area: document.getElementById('t-ar').value,
+    expected_fee: document.getElementById('t-fe').value,
+    about: document.getElementById('t-bi').value
   };
 
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_TEACHER, params)
-    .then(function () {
-      document.getElementById('tFrm').style.display = 'none';
-      document.getElementById('tOk').style.display = 'block';
-    })
-    .catch(function (err) {
-      console.error('EmailJS error:', err);
-      btn.disabled = false; btn.innerHTML = 'Submit Application &#8594;';
-      alert('Something went wrong. Please try again or contact us directly.');
+  try{
+
+    const response=await fetch("/api/submit",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(params)
     });
+
+    const result=await response.json();
+
+    if(result.success){
+      document.getElementById('tFrm').style.display='none';
+      document.getElementById('tOk').style.display='block';
+    }else{
+      throw new Error(result.message);
+    }
+
+  }catch(err){
+      console.error(err);
+      btn.disabled=false;
+      btn.innerHTML="Submit Application &#8594;";
+      alert("Submission failed.");
+  }
+
 }
 
 /* ─────────────────────────────────────────
